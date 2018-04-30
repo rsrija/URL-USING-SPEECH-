@@ -14,6 +14,7 @@ try:
     text = r.recognize_google(audio)
     print('You said:\n' + text)
     wb.get(chrome_path).open(text)
+    print('WELCOME TO' + text)
 
 except Exception as e:
     print(e)
