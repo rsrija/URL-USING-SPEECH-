@@ -1,3 +1,8 @@
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import WebDriverWait as wait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from lxml import html
 import csv,os,json
 import requests
@@ -46,12 +51,13 @@ try:
                     try:
                         text2 = r.recognize_google(audio)
                         text2.split(" ")
-                        text3="https://www.amazon.in/s/field-keywords="+text2 +"+"+"men"
+                        text3="https://www.amazon.in/s/field-keywords="+text2 +" "+ "men"
                         wb.get(chrome_path).open(text3)
                         engine.say('You asked for'+ text2)
                         engine.runAndWait()
                         engine.say('Here are your shirts! Happy shopping!')
                         engine.runAndWait()
+
                         url = text3
                         htmlfile = urllib.request.urlopen(url)
                         htmltext = htmlfile.read()
@@ -62,6 +68,7 @@ try:
                         for link in soup.find_all('li'):
                             if link.get('data-asin')!=None:
                                 links.append(link.get('data-asin'))
+
                         print(set(links))
                         links = (set(links))
 
@@ -75,59 +82,179 @@ try:
                                 try:
                                     doc = html.fromstring(page.content)
                                     XPATH_NAME = '//h1[@id="title"]//text()'
+                                    XPATH_AGGREGATE_RATING = '//div[@class="a-row a-spacing-small"]//text()'
                                     XPATH_SALE_PRICE = '//span[contains(@id,"ourprice") or contains(@id,"saleprice")]/text()'
                                     XPATH_ORIGINAL_PRICE = '//td[contains(text(),"List Price") or contains(text(),"M.R.P") or contains(text(),"Price")]/following-sibling::td/text()'
                                     XPATH_CATEGORY = '//a[@class="a-link-normal a-color-tertiary"]//text()'
-                                    XPATH_AVAILABILITY = '//div[@id="availability"]//text()'
+                                    #XPATH_AVAILABILITY = '//div[@id="availability"]//text()'
+                                    XPATH_COLOR='//div[@class="a-row"]//span[@class="selection"]//text()'
+                                    XPATH_NUM_OF_CUSTOMES='//div[@class="a-row"]//span[@class="a-size-medium totalReviewCount"]//text()'
+
                                     RAW_NAME = doc.xpath(XPATH_NAME)
+                                    RAW_COLOR=doc.xpath(XPATH_COLOR)
+                                    total_ratings = doc.xpath(XPATH_AGGREGATE_RATING)
                                     RAW_SALE_PRICE = doc.xpath(XPATH_SALE_PRICE)
                                     RAW_CATEGORY = doc.xpath(XPATH_CATEGORY)
                                     RAW_ORIGINAL_PRICE = doc.xpath(XPATH_ORIGINAL_PRICE)
-                                    RAW_AVAILABILITY = doc.xpath(XPATH_AVAILABILITY)
+                                    RAW_NUM_OF_CUSTOMERS=doc.xpath(XPATH_NUM_OF_CUSTOMES)
+                                    #RAW_AVAILABILITY = doc.xpath(XPATH_AVAILABILITY)
+
                                     NAME = ' '.join(''.join(RAW_NAME).split()) if RAW_NAME else None
+                                    COLOR = ' '.join(''.join(RAW_COLOR).split()) if RAW_COLOR else None
                                     SALE_PRICE = ' '.join(
                                         ''.join(RAW_SALE_PRICE).split()).strip() if RAW_SALE_PRICE else None
                                     CATEGORY = ' > '.join([i.strip() for i in RAW_CATEGORY]) if RAW_CATEGORY else None
                                     ORIGINAL_PRICE = ''.join(RAW_ORIGINAL_PRICE).strip() if RAW_ORIGINAL_PRICE else None
-                                    AVAILABILITY = ''.join(RAW_AVAILABILITY).strip() if RAW_AVAILABILITY else None
+                                    #AVAILABILITY = ''.join(RAW_AVAILABILITY).strip() if RAW_AVAILABILITY else None
+                                    NUM_OF_CUSTOMES = ''.join(RAW_NUM_OF_CUSTOMERS).strip(' ') if RAW_NUM_OF_CUSTOMERS else '1'
+                                    TOTAL_RATINGS = ''.join(total_ratings).replace('s','0').replace(' ','.').strip(' ') if total_ratings else None
+                                    TOTAL=0.0
+                                    ASIN=url[24:34]
+                                    rat=[]
+                                    RATINGS_NEEDED=''
+                                    dictionary_needed={}
+                                    a={}
+                                    TOTAL_1=0
+                                    if TOTAL_RATINGS!=None:
+                                        RATINGS_NEEDED=TOTAL_RATINGS[0:3]
+                                        TOTAL =str(int( float(RATINGS_NEEDED) * int(NUM_OF_CUSTOMES)))+''
+                                        TOTAL_1=int(TOTAL)
+                                        rat.append(TOTAL)
+
+                                    else:
+                                        print("SORRY")
+
+
+                                    #links is the list for all the ASIN numbers
+                                    #rat is the list of all the total ratings after the multiplication
+
+
                                     if not ORIGINAL_PRICE:
                                         ORIGINAL_PRICE = SALE_PRICE
 
                                     data = {
                                         'NAME': NAME,
+                                        'COLOR' : COLOR,
+                                        'TOTAL' : TOTAL_1,
+                                        'RATINGS': RATINGS_NEEDED,
                                         'SALE_PRICE': SALE_PRICE,
                                         'CATEGORY': CATEGORY,
                                         'ORIGINAL_PRICE': ORIGINAL_PRICE,
-                                        'AVAILABILITY': AVAILABILITY,
+                                        'CUSTOMERS' : NUM_OF_CUSTOMES,
+                                        'ASIN' :ASIN,
+                                        #'AVAILABILITY': AVAILABILITY,
                                         'URL': url,
                                     }
+
                                     return data
                                 except Exception as e:
                                     print(e)
 
 
+
                         def ReadAsin():
 
                             extracted_data = []
-
-
                             for i in links:
                                 url = "http://www.amazon.in/dp/" + i
                                 print("Processing: " + url)
+                                sleep(10)
                                 extracted_data.append(AmzonParser(url))
-                                sleep(5)
+
                                 f = open('data.json', 'w')
                                 json.dump(extracted_data, f, indent=4)
 
 
                         if __name__ == "__main__":
+                            sleep(10)
                             ReadAsin()
 
 
 
+                        input_file = open('data.json', 'r')
+                        json_decode = json.load(input_file)
+                        for item in json_decode:
+                            my_dict = {}
+                            my_dict['NAME'] = item.get('NAME')
+                            my_dict['CUSTOMERS'] = item.get('CUSTOMERS')
+                            my_dict['TOTAL'] = item.get('TOTAL')
+                            my_dict['ASIN'] = item.get('ASIN')
+                            my_dict['RATINGS']=item.get('RATINGS')
+                            my_dict['ORIGINAL PRICE'] = item.get('ORIGINAL_PRICE')
+                            my_dict['SALE_PRICE'] = item.get('SALE_PRICE')
+                            my_dict['URL']=item.get('URL')
+                            my_dict['COLOR'] = item.get('COLOR')
+                            print(my_dict)
+
+                        all_names = [i['NAME'] for i in json_decode]
+                        print(all_names)
+
+                        all_colors = [i['COLOR'] for i in json_decode]
+                        print(all_colors)
+
+                        all_urls = [i['URL'] for i in json_decode]
+                        print(all_urls)
 
 
+                        all_sales = [i['SALE_PRICE'] for i in json_decode]
+                        print(all_sales)
 
+                        all_orig = [i['ORIGINAL_PRICE'] for i in json_decode]
+                        print(all_orig)
+
+                        all_asins = [i['ASIN'] for i in json_decode]
+                        print(all_asins)
+
+                        all_ratings =[i['TOTAL'] for i in json_decode]
+                        print(all_ratings)
+                        b=all_ratings.index(max(all_ratings))
+                        print(b+1)
+                        print(all_asins[b])
+
+                        with sr.Microphone() as source:
+
+                            engine.say('So, Do you want me to selct one shirt for you?')
+                            engine.runAndWait()
+                            audio = r.listen(source)
+                            print('Done!')
+                        try:
+                            text = r.recognize_google(audio)
+                            print('You said:\n' + text)
+                            if ('yes' in text):
+                                wb.get(chrome_path).open(all_urls[b])
+                                engine.say('We have selected you a shirt named')
+                                engine.say(all_names[b])
+                                engine.say('with original price')
+                                engine.say(all_orig[b ])
+                                engine.say('and sale price')
+                                engine.say(all_sales[b])
+                                engine.say('of color')
+                                engine.say(all_colors[b])
+                                engine.runAndWait()
+                                chrome_options = webdriver.ChromeOptions()
+                                driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe",
+                                                          chrome_options=chrome_options)
+                                driver.get(all_urls[b])
+                                # Create new object for drop down
+                                select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
+
+                                with sr.Microphone() as source:
+                                    engine.say('Just tell me what is the size or your shirt to add to your cart')
+                                    engine.runAndWait()
+                                    audio = r.listen(source)
+                                    print('Done!')
+                                try:
+                                    text =r.recognize_google(audio)
+                                    print('You said:\n' + text)
+                                    # Select "Small" size
+                                    select.select_by_visible_text(text)
+                                    wait(driver, 5).until(EC.element_to_be_clickable((By.XPATH,'//input[@id="add-to-cart-button" and not(@style="cursor: not-allowed;")]'))).click()
+                                except Exception as e:
+                                    print(e)
+
+
+                        except Exception as e:
+                            print(e)
 
 
                     except Exception as e:
