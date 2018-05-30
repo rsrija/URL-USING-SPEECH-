@@ -19,14 +19,15 @@ r.energy_threshold = 4000
 engine = pyttsx3.init()
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
+
 with sr.Microphone() as source:
     print('Say Something!')
     engine.say('Are you bored! Want to have a look at different shirts?')
     engine.runAndWait()
-    audio = r.listen(source)
+    #audio = r.listen(source)
     print('Done!')
 try:
-    text = r.recognize_google(audio)
+    text = 'no'#r.recognize_google(audio)
     print('You said:\n' + text)
     if('yes' in text ):
      wb.get(chrome_path).open('https://www.amazon.in/Mens-Shirts/b/ref=sd_allcat_sbc_mfashion_shirts?ie=UTF8&node=1968093031')
@@ -36,20 +37,20 @@ try:
     elif ('no' in text):
         engine.say('So you want to look at a specific shirt to buy!')
         engine.runAndWait()
-        with sr.Microphone() as source:
-            audio = r.listen(source)
+        #with sr.Microphone() as source:
+            #audio = r.listen(source)
 
 
         try:
-            text1 = r.recognize_google(audio)
+            text1 = 'yes'#r.recognize_google(audio)
 
             if ('yes' in text1):
                 engine.say('Then please tell me what do you want to buy')
                 engine.runAndWait()
                 with sr.Microphone() as source:
-                    audio = r.listen(source)
+                    #audio = r.listen(source)
                     try:
-                        text2 = r.recognize_google(audio)
+                        text2 = 'pink shirt'#r.recognize_google(audio)
                         text2.split(" ")
                         text3="https://www.amazon.in/s/field-keywords="+text2 +" "+ "men"
                         wb.get(chrome_path).open(text3)
@@ -99,7 +100,7 @@ try:
                                     RAW_NUM_OF_CUSTOMERS=doc.xpath(XPATH_NUM_OF_CUSTOMES)
                                     #RAW_AVAILABILITY = doc.xpath(XPATH_AVAILABILITY)
 
-                                    NAME = ' '.join(''.join(RAW_NAME).split()) if RAW_NAME else None
+                                    NAME = ' '.join(''.join(RAW_NAME).split()) if RAW_NAME else ''
                                     COLOR = ' '.join(''.join(RAW_COLOR).split()) if RAW_COLOR else None
                                     SALE_PRICE = ' '.join(
                                         ''.join(RAW_SALE_PRICE).split()).strip() if RAW_SALE_PRICE else None
@@ -136,7 +137,7 @@ try:
                                         'NAME': NAME,
                                         'COLOR' : COLOR,
                                         'TOTAL' : TOTAL_1,
-                                        'RATINGS': RATINGS_NEEDED,
+                                        #'RATINGS': RATINGS_NEEDED,
                                         'SALE_PRICE': SALE_PRICE,
                                         'CATEGORY': CATEGORY,
                                         'ORIGINAL_PRICE': ORIGINAL_PRICE,
@@ -158,7 +159,7 @@ try:
                             for i in links:
                                 url = "http://www.amazon.in/dp/" + i
                                 print("Processing: " + url)
-                                sleep(10)
+                                sleep(3)
                                 extracted_data.append(AmzonParser(url))
 
                                 f = open('data.json', 'w')
@@ -166,7 +167,7 @@ try:
 
 
                         if __name__ == "__main__":
-                            sleep(10)
+
                             ReadAsin()
 
 
@@ -215,10 +216,10 @@ try:
 
                             engine.say('So, Do you want me to selct one shirt for you?')
                             engine.runAndWait()
-                            audio = r.listen(source)
+                            #audio = r.listen(source)
                             print('Done!')
                         try:
-                            text = r.recognize_google(audio)
+                            text = 'no'#r.recognize_google(audio)
                             print('You said:\n' + text)
                             if ('yes' in text):
                                 wb.get(chrome_path).open(all_urls[b])
@@ -235,16 +236,17 @@ try:
                                 driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe",
                                                           chrome_options=chrome_options)
                                 driver.get(all_urls[b])
+
                                 # Create new object for drop down
                                 select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
 
                                 with sr.Microphone() as source:
                                     engine.say('Just tell me what is the size or your shirt to add to your cart')
                                     engine.runAndWait()
-                                    audio = r.listen(source)
+                                    #audio = r.listen(source)
                                     print('Done!')
                                 try:
-                                    text =r.recognize_google(audio)
+                                    text ='Small'#r.recognize_google(audio)
                                     print('You said:\n' + text)
                                     # Select "Small" size
                                     select.select_by_visible_text(text)
@@ -252,7 +254,149 @@ try:
                                 except Exception as e:
                                     print(e)
 
+                            elif ('no' in text):
+                                engine.say('So, you want to modify the search and select your own shirts,')
+                                engine.runAndWait()
 
+                                with sr.Microphone() as source:
+                                    engine.say('Tell me the brand name')
+                                    engine.runAndWait()
+                                    #audio = r.listen(source)
+                                    print('Done!')
+                                try:
+                                    brand_name = 'Raymond black shirts'#r.recognize_google(audio)
+                                    print('You said:\n' + brand_name)
+                                    brand_name.split(" ")
+                                    text4 = "https://www.amazon.in/s/field-keywords=" + brand_name + " " + " for men"
+                                    wb.get(chrome_path).open(text4)
+                                    engine.say('Here are your shirts! Happy shopping!')
+                                    engine.runAndWait()
+                                    url_1 = text4
+                                    htmlfile_1 = urllib.request.urlopen(url_1)
+                                    htmltext_1 = htmlfile_1.read()
+                                    links = []
+                                    a = []
+                                    soup = bs.BeautifulSoup(htmltext_1, 'lxml')
+                                    all_tables = soup.find_all('li', {'class': 'a-link-normal a-text-normal'})
+                                    for link in soup.find_all('li'):
+                                        if link.get('data-asin') != None:
+                                            links.append(link.get('data-asin'))
+
+                                    print(set(links))
+                                    links = (set(links))
+                                    extracted_data = []
+                                    for i in links:
+                                        url = "http://www.amazon.in/dp/" + i
+                                        print("Processing: " + url)
+                                        sleep(3)
+                                        extracted_data.append(AmzonParser(url))
+
+                                        f = open('data.json', 'w')
+                                        json.dump(extracted_data, f, indent=4)
+
+                                    input_file = open('data.json', 'r')
+                                    json_decode = json.load(input_file)
+                                    for item in json_decode:
+                                        my_dict = {}
+                                        my_dict['NAME'] = item.get('NAME')
+                                        my_dict['CUSTOMERS'] = item.get('CUSTOMERS')
+                                        my_dict['TOTAL'] = item.get('TOTAL')
+                                        my_dict['ASIN'] = item.get('ASIN')
+                                        my_dict['RATINGS'] = item.get('RATINGS')
+                                        my_dict['ORIGINAL PRICE'] = item.get('ORIGINAL_PRICE')
+                                        my_dict['SALE_PRICE'] = item.get('SALE_PRICE')
+                                        my_dict['URL'] = item.get('URL')
+                                        my_dict['COLOR'] = item.get('COLOR')
+                                        print(my_dict)
+
+                                    all_names = [i['NAME'] for i in json_decode]
+                                    print(all_names)
+
+
+                                    all_colors = [i['COLOR'] for i in json_decode]
+                                    print(all_colors)
+
+                                    all_urls = [i['URL'] for i in json_decode]
+                                    print(all_urls)
+
+                                    all_sales = [i['SALE_PRICE'] for i in json_decode]
+                                    print(all_sales)
+
+                                    all_orig = [i['ORIGINAL_PRICE'] for i in json_decode]
+                                    print(all_orig)
+
+                                    all_asins = [i['ASIN'] for i in json_decode]
+                                    print(all_asins)
+
+                                    all_ratings = [i['TOTAL'] for i in json_decode]
+                                    print(all_ratings)
+
+                                    for i in all_names:
+                                        if ('t-shirt' or 'shirt') and 'Raymond' not in i:
+                                            j=all_names.index(i)
+                                            print(all_names[j])
+                                        all_names.pop(j)
+                                        all_colors.pop(j)
+                                        all_urls.pop(j)
+                                        all_orig.pop(j)
+                                        all_asins.pop(j)
+                                        all_ratings.pop(j)
+                                        all_sales.pop(j)
+                                    print(all_names)
+                                    chrome_options = webdriver.ChromeOptions()
+                                    driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe",chrome_options=chrome_options)
+                                    b = all_ratings.index(max(all_ratings))
+                                    print(b + 1)
+                                    print(all_asins[b])
+
+                                    driver.get(all_urls[b])
+
+                                    # Create new object for drop down
+                                    select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
+
+                                    with sr.Microphone() as source:
+                                        engine.say('Just tell me what is the size or your shirt to add to your cart')
+                                        engine.runAndWait()
+                                        # audio = r.listen(source)
+                                        print('Done!')
+                                    try:
+                                        text = 'small' #r.recognize_google(audio)
+                                        text=text.title()
+                                        print('You said:\n' + text)
+                                        # Select "Small" size
+                                        headers = {
+                                            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36'}
+                                        page = requests.get(url, headers=headers)
+                                        while True:
+                                            sleep(3)
+                                            try:
+                                                doc = html.fromstring(page.content)
+                                                XPATH_SIZE= '//span[@class="a-dropdown-container"]//option[@class="dropdownAvailable"]//text()'
+                                                RAW_SIZE = doc.xpath(XPATH_SIZE)
+                                                SIZE = ' '.join(''.join(RAW_SIZE).split()) if RAW_SIZE else ''
+                                                print(SIZE)
+                                            except Exception as e:
+                                                print(e)
+
+
+                                        if (SIZE=='Small'):
+                                            select.select_by_visible_text(text)
+                                        elif (SIZE=='39'):
+                                            if(text=='Small'):
+                                                select.select_by_visible_text('39')
+                                            elif(text=='Medium'):
+                                                select.select_by_visible_text('40')
+                                            elif (text == 'Large'):
+                                                select.select_by_visible_text('41')
+                                            elif (text == 'XL'):
+                                                select.select_by_visible_text('42')
+
+                                        wait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, '//input[@id="add-to-cart-button" and not(@style="cursor: not-allowed;")]'))).click()
+                                    except Exception as e:
+                                        print(e)
+
+                                except Exception as e:
+                                    print(e)
                         except Exception as e:
                             print(e)
 
@@ -267,5 +411,4 @@ try:
 
 except Exception as e:
     print(e)
-
 
