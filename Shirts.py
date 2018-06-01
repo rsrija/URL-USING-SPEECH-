@@ -24,9 +24,10 @@ with sr.Microphone() as source:
     print('Say Something!')
     engine.say('Are you bored! Want to have a look at different shirts?')
     engine.runAndWait()
-    #audio = r.listen(source)
+    audio = r.listen(source)
     print('Done!')
 try:
+
     text = 'no'#r.recognize_google(audio)
     print('You said:\n' + text)
     if('yes' in text ):
@@ -37,20 +38,20 @@ try:
     elif ('no' in text):
         engine.say('So you want to look at a specific shirt to buy!')
         engine.runAndWait()
-        #with sr.Microphone() as source:
-            #audio = r.listen(source)
+        with sr.Microphone() as source:
+            audio = r.listen(source)
 
 
         try:
             text1 = 'yes'#r.recognize_google(audio)
 
             if ('yes' in text1):
-                engine.say('Then please tell me what do you want to buy')
+                engine.say('Then please tell me what do you want to buy and also specify the price criteria if needed')
                 engine.runAndWait()
                 with sr.Microphone() as source:
-                    #audio = r.listen(source)
+                    audio = r.listen(source)
                     try:
-                        text2 = 'pink shirt'#r.recognize_google(audio)
+                        text2 = 'black shirt'#r.recognize_google(audio)
                         text2.split(" ")
                         text3="https://www.amazon.in/s/field-keywords="+text2 +" "+ "men"
                         wb.get(chrome_path).open(text3)
@@ -159,7 +160,7 @@ try:
                             for i in links:
                                 url = "http://www.amazon.in/dp/" + i
                                 print("Processing: " + url)
-                                sleep(3)
+                                #sleep(3)
                                 extracted_data.append(AmzonParser(url))
 
                                 f = open('data.json', 'w')
@@ -216,7 +217,7 @@ try:
 
                             engine.say('So, Do you want me to selct one shirt for you?')
                             engine.runAndWait()
-                            #audio = r.listen(source)
+                            audio = r.listen(source)
                             print('Done!')
                         try:
                             text = 'no'#r.recognize_google(audio)
@@ -243,7 +244,7 @@ try:
                                 with sr.Microphone() as source:
                                     engine.say('Just tell me what is the size or your shirt to add to your cart')
                                     engine.runAndWait()
-                                    #audio = r.listen(source)
+                                    audio = r.listen(source)
                                     print('Done!')
                                 try:
                                     text ='Small'#r.recognize_google(audio)
@@ -261,10 +262,11 @@ try:
                                 with sr.Microphone() as source:
                                     engine.say('Tell me the brand name')
                                     engine.runAndWait()
-                                    #audio = r.listen(source)
+                                    audio = r.listen(source)
                                     print('Done!')
                                 try:
-                                    brand_name = 'Raymond black shirts'#r.recognize_google(audio)
+                                    brand_name = 'Lee Cooper black shirt'#r.recognize_google(audio)
+                                    brand_name=brand_name.lower()
                                     print('You said:\n' + brand_name)
                                     brand_name.split(" ")
                                     text4 = "https://www.amazon.in/s/field-keywords=" + brand_name + " " + " for men"
@@ -309,87 +311,90 @@ try:
                                         my_dict['COLOR'] = item.get('COLOR')
                                         print(my_dict)
 
-                                    all_names = [i['NAME'] for i in json_decode]
-                                    print(all_names)
+                                    all_names = [i['NAME'].lower() for i in json_decode]
+                                    #print(all_names)
 
 
                                     all_colors = [i['COLOR'] for i in json_decode]
-                                    print(all_colors)
+                                    #print(all_colors)
 
                                     all_urls = [i['URL'] for i in json_decode]
-                                    print(all_urls)
+                                    #print(all_urls)
 
                                     all_sales = [i['SALE_PRICE'] for i in json_decode]
-                                    print(all_sales)
+                                    #print(all_sales)
 
                                     all_orig = [i['ORIGINAL_PRICE'] for i in json_decode]
-                                    print(all_orig)
+                                    #print(all_orig)
 
                                     all_asins = [i['ASIN'] for i in json_decode]
-                                    print(all_asins)
+                                    #print(all_asins)
 
                                     all_ratings = [i['TOTAL'] for i in json_decode]
-                                    print(all_ratings)
+                                    #print(all_ratings)
 
+                                    new_names = []
+                                    new_colors = []
+                                    new_urls = []
+                                    new_sales = []
+                                    new_orig = []
+                                    new_asins = []
+                                    new_ratings = []
+                                    j = []
                                     for i in all_names:
-                                        if ('t-shirt' or 'shirt') and 'Raymond' not in i:
-                                            j=all_names.index(i)
-                                            print(all_names[j])
-                                        all_names.pop(j)
-                                        all_colors.pop(j)
-                                        all_urls.pop(j)
-                                        all_orig.pop(j)
-                                        all_asins.pop(j)
-                                        all_ratings.pop(j)
-                                        all_sales.pop(j)
-                                    print(all_names)
+                                        if ((('t-shirt' or 'shirt') in i) and ('lee cooper') in i):
+                                            j = all_names.index(i)
+                                            new_names.append(i)
+                                            new_colors.append(all_colors[j])
+                                            new_urls.append(all_urls[j])
+                                            new_sales.append(all_sales[j])
+                                            new_orig.append(all_orig[j])
+                                            new_asins.append(all_asins[j])
+                                            new_ratings.append(all_ratings[j])
+
+                                    print(new_names)
+                                    print(new_colors)
+                                    print(new_urls)
+                                    print(new_sales)
+                                    print(new_orig)
+                                    print(new_asins)
+                                    print(new_ratings)
+
+                                    b = new_ratings.index(max(new_ratings))
+                                    print(new_ratings[b])
+                                    print(new_asins[b])
+                                    print(new_urls[b])
+
+                                    headers = {
+                                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36'}
+                                    page = requests.get(new_urls[b], headers=headers)
+                                    doc = html.fromstring(page.content)
+                                    XPATH_SIZE = '//span[@class="a-dropdown-container"]//select[@class="a-native-dropdown"]//option[@class="a-dropdown-container"]//text()'
+                                    RAW_SIZE = doc.xpath(XPATH_SIZE)
+                                    SIZE = ' '.join(''.join(RAW_SIZE).split()) if RAW_SIZE else 'None'
+
+                                    print(SIZE)
+
                                     chrome_options = webdriver.ChromeOptions()
                                     driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe",chrome_options=chrome_options)
-                                    b = all_ratings.index(max(all_ratings))
-                                    print(b + 1)
-                                    print(all_asins[b])
-
-                                    driver.get(all_urls[b])
-
-                                    # Create new object for drop down
+                                    driver.get(new_urls[b])
                                     select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
 
                                     with sr.Microphone() as source:
                                         engine.say('Just tell me what is the size or your shirt to add to your cart')
                                         engine.runAndWait()
-                                        # audio = r.listen(source)
+                                        audio = r.listen(source)
                                         print('Done!')
                                     try:
-                                        text = 'small' #r.recognize_google(audio)
-                                        text=text.title()
-                                        print('You said:\n' + text)
+                                        text_10 = 'Small' #r.recognize_google(audio)
+                                        #text_10=text_10.title()
+
+                                        print('You said:\n' + text_10)
                                         # Select "Small" size
-                                        headers = {
-                                            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36'}
-                                        page = requests.get(url, headers=headers)
-                                        while True:
-                                            sleep(3)
-                                            try:
-                                                doc = html.fromstring(page.content)
-                                                XPATH_SIZE= '//span[@class="a-dropdown-container"]//option[@class="dropdownAvailable"]//text()'
-                                                RAW_SIZE = doc.xpath(XPATH_SIZE)
-                                                SIZE = ' '.join(''.join(RAW_SIZE).split()) if RAW_SIZE else ''
-                                                print(SIZE)
-                                            except Exception as e:
-                                                print(e)
 
+                                        # Create new object for drop down
+                                        select.select_by_visible_text(text_10)
 
-                                        if (SIZE=='Small'):
-                                            select.select_by_visible_text(text)
-                                        elif (SIZE=='39'):
-                                            if(text=='Small'):
-                                                select.select_by_visible_text('39')
-                                            elif(text=='Medium'):
-                                                select.select_by_visible_text('40')
-                                            elif (text == 'Large'):
-                                                select.select_by_visible_text('41')
-                                            elif (text == 'XL'):
-                                                select.select_by_visible_text('42')
 
                                         wait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, '//input[@id="add-to-cart-button" and not(@style="cursor: not-allowed;")]'))).click()
                                     except Exception as e:
@@ -411,4 +416,5 @@ try:
 
 except Exception as e:
     print(e)
+
 
