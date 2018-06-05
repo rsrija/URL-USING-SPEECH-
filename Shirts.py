@@ -3,6 +3,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import numpy as np
 from lxml import html
 import csv,os,json
 import requests
@@ -19,6 +20,19 @@ r.energy_threshold = 4000
 engine = pyttsx3.init()
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
+def size_functions(url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36'}
+    page = requests.get(url, headers=headers)
+    doc = html.fromstring(page.content)
+
+    XPATH_SIZE = '//span[@class="a-dropdown-container"]//select[@class="a-native-dropdown"]//text()'
+    RAW_SIZE = doc.xpath(XPATH_SIZE)
+
+    SIZE = ' '.join(''.join(RAW_SIZE).split()) if RAW_SIZE else ''
+    engine.say('The available sizes are')
+    engine.say(SIZE)
+
 
 with sr.Microphone() as source:
     print('Say Something!')
@@ -51,7 +65,7 @@ try:
                 with sr.Microphone() as source:
                     audio = r.listen(source)
                     try:
-                        text2 = 'black shirt'#r.recognize_google(audio)
+                        text2 = 'white shirt'#r.recognize_google(audio)
                         text2.split(" ")
                         text3="https://www.amazon.in/s/field-keywords="+text2 +" "+ "men"
                         wb.get(chrome_path).open(text3)
@@ -240,6 +254,7 @@ try:
 
                                 # Create new object for drop down
                                 select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
+                                size_functions(all_urls[b])
 
                                 with sr.Microphone() as source:
                                     engine.say('Just tell me what is the size or your shirt to add to your cart')
@@ -265,11 +280,12 @@ try:
                                     audio = r.listen(source)
                                     print('Done!')
                                 try:
-                                    brand_name = 'Lee Cooper black shirt'#r.recognize_google(audio)
-                                    brand_name=brand_name.lower()
+                                    brand_name = 'Lee Cooper '#r.recognize_google(audio)
+                                    brand_name_1=brand_name.lower()
                                     print('You said:\n' + brand_name)
-                                    brand_name.split(" ")
-                                    text4 = "https://www.amazon.in/s/field-keywords=" + brand_name + " " + " for men"
+
+                                    print(brand_name_1)
+                                    text4 = "https://www.amazon.in/s/field-keywords=" + brand_name_1 + " " +text2+ " for men"
                                     wb.get(chrome_path).open(text4)
                                     engine.say('Here are your shirts! Happy shopping!')
                                     engine.runAndWait()
@@ -300,7 +316,7 @@ try:
                                     json_decode = json.load(input_file)
                                     for item in json_decode:
                                         my_dict = {}
-                                        my_dict['NAME'] = item.get('NAME')
+                                        my_dict['NAME'] = item.get('NAME').lower()
                                         my_dict['CUSTOMERS'] = item.get('CUSTOMERS')
                                         my_dict['TOTAL'] = item.get('TOTAL')
                                         my_dict['ASIN'] = item.get('ASIN')
@@ -312,7 +328,7 @@ try:
                                         print(my_dict)
 
                                     all_names = [i['NAME'].lower() for i in json_decode]
-                                    #print(all_names)
+                                    print(all_names)
 
 
                                     all_colors = [i['COLOR'] for i in json_decode]
@@ -342,12 +358,12 @@ try:
                                     new_ratings = []
                                     j = []
                                     for i in all_names:
-                                        if ((('t-shirt' or 'shirt') in i) and ('lee cooper') in i):
+                                        if ((('t-shirt' or 'shirt') in i) and ((brand_name_1) in i)):
                                             j = all_names.index(i)
                                             new_names.append(i)
                                             new_colors.append(all_colors[j])
                                             new_urls.append(all_urls[j])
-                                            new_sales.append(all_sales[j])
+                                            new_sales.append((all_sales[j][:-3].replace(',','')))
                                             new_orig.append(all_orig[j])
                                             new_asins.append(all_asins[j])
                                             new_ratings.append(all_ratings[j])
@@ -359,46 +375,220 @@ try:
                                     print(new_orig)
                                     print(new_asins)
                                     print(new_ratings)
-
-                                    b = new_ratings.index(max(new_ratings))
-                                    print(new_ratings[b])
-                                    print(new_asins[b])
-                                    print(new_urls[b])
-
-                                    headers = {
-                                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36'}
-                                    page = requests.get(new_urls[b], headers=headers)
-                                    doc = html.fromstring(page.content)
-                                    XPATH_SIZE = '//span[@class="a-dropdown-container"]//select[@class="a-native-dropdown"]//option[@class="a-dropdown-container"]//text()'
-                                    RAW_SIZE = doc.xpath(XPATH_SIZE)
-                                    SIZE = ' '.join(''.join(RAW_SIZE).split()) if RAW_SIZE else 'None'
-
-                                    print(SIZE)
-
-                                    chrome_options = webdriver.ChromeOptions()
-                                    driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe",chrome_options=chrome_options)
-                                    driver.get(new_urls[b])
-                                    select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
-
+                                    engine.say('Do you want to specify a price range....I mean your budget price')
+                                    engine.runAndWait()
                                     with sr.Microphone() as source:
-                                        engine.say('Just tell me what is the size or your shirt to add to your cart')
-                                        engine.runAndWait()
                                         audio = r.listen(source)
                                         print('Done!')
                                     try:
-                                        text_10 = 'Small' #r.recognize_google(audio)
-                                        #text_10=text_10.title()
+                                        decision_for_price='yes'#r.recognize_google(audio)
+                                        if(decision_for_price=='no'):
+                                            arr = np.array(new_ratings)
+                                            arr=arr.argsort()[-2:][::-1]
+                                            print(arr)
 
-                                        print('You said:\n' + text_10)
-                                        # Select "Small" size
+                                            engine.say('We have selected 2 shirts out for you! Pick one!!')
+                                            engine.runAndWait()
 
-                                        # Create new object for drop down
-                                        select.select_by_visible_text(text_10)
+                                            for i in arr:
+                                                engine.say(i)
+                                                engine.runAndWait()
+                                                engine.say('The shirt is')
+                                                engine.say(new_names[i])
+                                                engine.say('of  price')
+                                                engine.say(new_sales[i])
+                                                engine.say('of color')
+                                                engine.say(new_colors[i])
+                                                engine.runAndWait()
+                                                a=arr[0]
+                                                #b=arr[1]
 
 
-                                        wait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, '//input[@id="add-to-cart-button" and not(@style="cursor: not-allowed;")]'))).click()
+                                            engine.say('So, what do you want')
+                                            engine.runAndWait()
+
+                                            with sr.Microphone() as source:
+                                                audio = r.listen(source)
+                                                print('Done!')
+                                            try:
+
+                                                choosing = 'first'#r.recognize_google(audio)
+                                                if ('first' in choosing):
+                                                    engine.say('So you have selcted the first one')
+                                                    engine.say('The shirt is')
+                                                    engine.say(new_names[arr[0]])
+                                                    engine.say('of  price')
+                                                    engine.say(new_sales[arr[0]])
+                                                    engine.say('of color')
+                                                    engine.say(new_colors[arr[0]])
+                                                    engine.runAndWait()
+
+                                                    chrome_options = webdriver.ChromeOptions()
+                                                    driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe", chrome_options=chrome_options)
+                                                    driver.get(new_urls[a])
+                                                    select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
+                                                    size_functions(new_urls[a])
+                                                '''elif ('second' in choosing):
+                                                    engine.say('So you have selcted the second one')
+                                                    engine.say('The shirt is')
+                                                    engine.say(new_names[arr[1]])
+                                                    engine.say('of  price')
+                                                    engine.say(new_sales[arr[1]])
+                                                    engine.say('of color')
+                                                    engine.say(new_colors[arr[1]])
+                                                    engine.runAndWait()
+
+                                                    chrome_options = webdriver.ChromeOptions()
+                                                    driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe", chrome_options=chrome_options)
+                                                    driver.get(new_urls[b])
+                                                    select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
+                                                    size_functions(new_urls[b])'''
+                                                with sr.Microphone() as source:
+                                                    engine.say('Just tell me what is the size or your shirt to add to your cart')
+                                                    engine.runAndWait()
+                                                    audio = r.listen(source)
+                                                    print('Done!')
+                                                try:
+                                                    text_10 = 'Small'  # r.recognize_google(audio)
+                                                    # text_10=text_10.title()
+
+                                                    print('You said:\n' + text_10)
+                                                    # Select "Small" size
+
+                                                    # Create new object for drop down
+                                                    select.select_by_visible_text(text_10)
+
+
+                                                    wait(driver, 5).until(EC.element_to_be_clickable((By.XPATH,'//input[@id="add-to-cart-button" and not(@style="cursor: not-allowed;")]'))).click()
+
+                                                except Exception as e:
+                                                    print(e)
+                                            except Exception as e:
+                                                print(e)
+
+                                        elif(decision_for_price=='yes'):
+                                            engine.say('These are the price ranges avalaibale')
+                                            engine.say(min(new_sales))
+                                            engine.say('to')
+                                            engine.say(max(new_sales))
+                                            c=''
+
+                                            with sr.Microphone() as source:
+                                                engine.say('Please specify your budget')
+                                                engine.runAndWait()
+                                                audio = r.listen(source)
+                                                print('Done!')
+                                            try:
+                                                text_11 = '999'
+                                                c = int(text_11)  # r.recognize_google(audio)
+                                                print(int(text_11))
+                                                b = []
+                                                for i in new_sales:
+                                                    a = int(i)
+                                                    d = abs(c - a)
+                                                    print(d)
+                                                    b += [d]
+
+                                                print(b)
+
+                                                arr_1 = np.array(b)
+                                                arr_1 = arr_1.argsort()[:2]
+                                                print(arr_1)
+
+                                                for i in arr_1:
+                                                    new_sales[i]
+                                                    a = new_names[i]
+                                                    print(a)
+                                                engine.say('We have selected 2 shirts out for you! Pick one!!')
+                                                engine.runAndWait()
+
+                                                for i in arr_1:
+                                                    engine.say(i)
+                                                    engine.runAndWait()
+                                                    engine.say('The shirt is')
+                                                    engine.say(new_names[i])
+                                                    engine.say('of  price')
+                                                    engine.say(new_sales[i])
+                                                    engine.say('of color')
+                                                    engine.say(new_colors[i])
+                                                    engine.runAndWait()
+                                                    a = arr_1[0]
+                                                    #b = arr_1[1]
+
+                                                engine.say('So, what do you want')
+                                                engine.runAndWait()
+
+                                                with sr.Microphone() as source:
+                                                    audio = r.listen(source)
+                                                    print('Done!')
+                                                try:
+
+                                                    choosing = 'first'  # r.recognize_google(audio)
+                                                    if ('first' in choosing):
+                                                        engine.say('So you have selcted the first one')
+                                                        engine.say('The shirt is')
+                                                        engine.say(new_names[arr_1[0]])
+                                                        engine.say('of  price')
+                                                        engine.say(new_sales[arr_1[0]])
+                                                        engine.say('of color')
+                                                        engine.say(new_colors[arr_1[0]])
+                                                        engine.runAndWait()
+
+                                                        chrome_options = webdriver.ChromeOptions()
+                                                        driver = webdriver.Chrome(
+                                                            executable_path="C:/chromedriver_win32/chromedriver.exe",
+                                                            chrome_options=chrome_options)
+                                                        driver.get(new_urls[a])
+                                                        select = Select(driver.find_element_by_id(
+                                                            "native_dropdown_selected_size_name"))
+                                                        size_functions(new_urls[a])
+                                                    '''elif ('second' in choosing):
+                                                        engine.say('So you have selcted the second one')
+                                                        engine.say('The shirt is')
+                                                        engine.say(new_names[arr_1[1]])
+                                                        engine.say('of  price')
+                                                        engine.say(new_sales[arr_1[1]])
+                                                        engine.say('of color')
+                                                        engine.say(new_colors[arr_1[1]])
+                                                        engine.runAndWait()
+
+                                                        chrome_options = webdriver.ChromeOptions()
+                                                        driver = webdriver.Chrome(
+                                                            executable_path="C:/chromedriver_win32/chromedriver.exe",
+                                                            chrome_options=chrome_options)
+                                                        driver.get(new_urls[b])
+                                                        select = Select(driver.find_element_by_id(
+                                                            "native_dropdown_selected_size_name"))
+                                                        size_functions(new_urls[b])'''
+                                                    with sr.Microphone() as source:
+                                                        engine.say(
+                                                            'Just tell me what is the size or your shirt to add to your cart')
+                                                        engine.runAndWait()
+                                                        audio = r.listen(source)
+                                                        print('Done!')
+                                                    try:
+                                                        text_10 = 'Small'  # r.recognize_google(audio)
+                                                        # text_10=text_10.title()
+
+                                                        print('You said:\n' + text_10)
+                                                        # Select "Small" size
+
+                                                        # Create new object for drop down
+                                                        select.select_by_visible_text(text_10)
+
+                                                        wait(driver, 5).until(EC.element_to_be_clickable((By.XPATH,'//input[@id="add-to-cart-button" and not(@style="cursor: not-allowed;")]'))).click()
+
+                                                    except Exception as e:
+                                                        print(e)
+                                                except Exception as e:
+                                                    print(e)
+
+                                            except Exception as e :
+                                                print(e)
+
                                     except Exception as e:
                                         print(e)
+
 
                                 except Exception as e:
                                     print(e)
