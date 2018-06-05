@@ -42,7 +42,7 @@ with sr.Microphone() as source:
     print('Done!')
 try:
 
-    text = 'no'#r.recognize_google(audio)
+    text = r.recognize_google(audio)
     print('You said:\n' + text)
     if('yes' in text ):
      wb.get(chrome_path).open('https://www.amazon.in/Mens-Shirts/b/ref=sd_allcat_sbc_mfashion_shirts?ie=UTF8&node=1968093031')
@@ -57,7 +57,7 @@ try:
 
 
         try:
-            text1 = 'yes'#r.recognize_google(audio)
+            text1 = r.recognize_google(audio)
 
             if ('yes' in text1):
                 engine.say('Then please tell me what do you want to buy and also specify the price criteria if needed')
@@ -65,7 +65,7 @@ try:
                 with sr.Microphone() as source:
                     audio = r.listen(source)
                     try:
-                        text2 = 'white shirt'#r.recognize_google(audio)
+                        text2 = r.recognize_google(audio)
                         text2.split(" ")
                         text3="https://www.amazon.in/s/field-keywords="+text2 +" "+ "men"
                         wb.get(chrome_path).open(text3)
@@ -234,7 +234,7 @@ try:
                             audio = r.listen(source)
                             print('Done!')
                         try:
-                            text = 'no'#r.recognize_google(audio)
+                            text = r.recognize_google(audio)
                             print('You said:\n' + text)
                             if ('yes' in text):
                                 wb.get(chrome_path).open(all_urls[b])
@@ -262,7 +262,7 @@ try:
                                     audio = r.listen(source)
                                     print('Done!')
                                 try:
-                                    text ='Small'#r.recognize_google(audio)
+                                    text =r.recognize_google(audio)
                                     print('You said:\n' + text)
                                     # Select "Small" size
                                     select.select_by_visible_text(text)
@@ -332,22 +332,22 @@ try:
 
 
                                     all_colors = [i['COLOR'] for i in json_decode]
-                                    #print(all_colors)
+                                    print(all_colors)
 
                                     all_urls = [i['URL'] for i in json_decode]
-                                    #print(all_urls)
+                                    print(all_urls)
 
                                     all_sales = [i['SALE_PRICE'] for i in json_decode]
-                                    #print(all_sales)
+                                    print(all_sales)
 
                                     all_orig = [i['ORIGINAL_PRICE'] for i in json_decode]
-                                    #print(all_orig)
+                                    print(all_orig)
 
                                     all_asins = [i['ASIN'] for i in json_decode]
-                                    #print(all_asins)
+                                    print(all_asins)
 
                                     all_ratings = [i['TOTAL'] for i in json_decode]
-                                    #print(all_ratings)
+                                    print(all_ratings)
 
                                     new_names = []
                                     new_colors = []
@@ -381,7 +381,7 @@ try:
                                         audio = r.listen(source)
                                         print('Done!')
                                     try:
-                                        decision_for_price='yes'#r.recognize_google(audio)
+                                        decision_for_price=r.recognize_google(audio)
                                         if(decision_for_price=='no'):
                                             arr = np.array(new_ratings)
                                             arr=arr.argsort()[-2:][::-1]
@@ -401,7 +401,7 @@ try:
                                                 engine.say(new_colors[i])
                                                 engine.runAndWait()
                                                 a=arr[0]
-                                                #b=arr[1]
+                                                b=arr[1]
 
 
                                             engine.say('So, what do you want')
@@ -412,7 +412,7 @@ try:
                                                 print('Done!')
                                             try:
 
-                                                choosing = 'first'#r.recognize_google(audio)
+                                                choosing =r.recognize_google(audio)
                                                 if ('first' in choosing):
                                                     engine.say('So you have selcted the first one')
                                                     engine.say('The shirt is')
@@ -428,7 +428,7 @@ try:
                                                     driver.get(new_urls[a])
                                                     select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
                                                     size_functions(new_urls[a])
-                                                '''elif ('second' in choosing):
+                                                    elif ('second' in choosing):
                                                     engine.say('So you have selcted the second one')
                                                     engine.say('The shirt is')
                                                     engine.say(new_names[arr[1]])
@@ -442,15 +442,15 @@ try:
                                                     driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe", chrome_options=chrome_options)
                                                     driver.get(new_urls[b])
                                                     select = Select(driver.find_element_by_id("native_dropdown_selected_size_name"))
-                                                    size_functions(new_urls[b])'''
+                                                    size_functions(new_urls[b])
                                                 with sr.Microphone() as source:
                                                     engine.say('Just tell me what is the size or your shirt to add to your cart')
                                                     engine.runAndWait()
                                                     audio = r.listen(source)
                                                     print('Done!')
                                                 try:
-                                                    text_10 = 'Small'  # r.recognize_google(audio)
-                                                    # text_10=text_10.title()
+                                                    text_10 = r.recognize_google(audio)
+                                                     text_10=text_10.title()
 
                                                     print('You said:\n' + text_10)
                                                     # Select "Small" size
@@ -479,8 +479,9 @@ try:
                                                 audio = r.listen(source)
                                                 print('Done!')
                                             try:
-                                                text_11 = '999'
-                                                c = int(text_11)  # r.recognize_google(audio)
+                                                text_11 =  r.recognize_google(audio)
+
+                                                c = int(text_11)  
                                                 print(int(text_11))
                                                 b = []
                                                 for i in new_sales:
@@ -513,7 +514,7 @@ try:
                                                     engine.say(new_colors[i])
                                                     engine.runAndWait()
                                                     a = arr_1[0]
-                                                    #b = arr_1[1]
+                                                    b = arr_1[1]
 
                                                 engine.say('So, what do you want')
                                                 engine.runAndWait()
@@ -523,7 +524,7 @@ try:
                                                     print('Done!')
                                                 try:
 
-                                                    choosing = 'first'  # r.recognize_google(audio)
+                                                    choosing =  r.recognize_google(audio)
                                                     if ('first' in choosing):
                                                         engine.say('So you have selcted the first one')
                                                         engine.say('The shirt is')
@@ -542,7 +543,7 @@ try:
                                                         select = Select(driver.find_element_by_id(
                                                             "native_dropdown_selected_size_name"))
                                                         size_functions(new_urls[a])
-                                                    '''elif ('second' in choosing):
+                                                       elif ('second' in choosing):
                                                         engine.say('So you have selcted the second one')
                                                         engine.say('The shirt is')
                                                         engine.say(new_names[arr_1[1]])
@@ -559,7 +560,7 @@ try:
                                                         driver.get(new_urls[b])
                                                         select = Select(driver.find_element_by_id(
                                                             "native_dropdown_selected_size_name"))
-                                                        size_functions(new_urls[b])'''
+                                                        size_functions(new_urls[b])
                                                     with sr.Microphone() as source:
                                                         engine.say(
                                                             'Just tell me what is the size or your shirt to add to your cart')
@@ -567,8 +568,8 @@ try:
                                                         audio = r.listen(source)
                                                         print('Done!')
                                                     try:
-                                                        text_10 = 'Small'  # r.recognize_google(audio)
-                                                        # text_10=text_10.title()
+                                                        text_10 = r.recognize_google(audio)
+                                                        text_10=text_10.title()
 
                                                         print('You said:\n' + text_10)
                                                         # Select "Small" size
